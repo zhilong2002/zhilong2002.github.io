@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="John Doe">
+
+
+
+
+
+<title>KL散度与自然梯度下降法 | Hexo</title>
+
+
+
+    <link rel="icon" href="/zhilong2002.github.io/bulb.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/zhilong2002.github.io/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/zhilong2002.github.io/js/script.js"></script>
+    
+    <script src="/zhilong2002.github.io/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+            <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+        
+    
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/zhilong2002.github.io/">ZhiLong&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/zhilong2002.github.io/archives">Posts</a>
+                
+                    <a class="menu-item" href="/zhilong2002.github.io/category">Categories</a>
+                
+                    <a class="menu-item" href="/zhilong2002.github.io/tag">Tags</a>
+                
+                    <a class="menu-item" href="/zhilong2002.github.io/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/zhilong2002.github.io/">ZhiLong&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/zhilong2002.github.io/archives">Posts</a>
+                
+                    <a class="menu-item" href="/zhilong2002.github.io/category">Categories</a>
+                
+                    <a class="menu-item" href="/zhilong2002.github.io/tag">Tags</a>
+                
+                    <a class="menu-item" href="/zhilong2002.github.io/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">KL散度与自然梯度下降法</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">John Doe</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">November 29, 2024&nbsp;&nbsp;0:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/zhilong2002.github.io/categories/hexo/">hexo</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>我们常用KL散度度量两个分布之间的差异。例如对于分布$p(x)$以及$q(x)$，他们之间的KL散度定义为$$KL(p(x)||q(x))&#x3D;\int_X p(x)log\frac{p(x)}{q(x)}dx$$注意这个度量并不是对称的。但$p(x)&#x3D;q(x)$时，$KL(p(x)||q(x))&#x3D;0$。<br>对于带不同参数的同一类分布下面写出KL散度的二阶近似$$KL(p(x|\theta)||p(x|\theta’))\approx (\theta-\theta’)^{\top}H_{KL}(\theta-\theta’)$$这是因为$$\begin{align}<br>KL(p(x|\theta)||p(x|\theta’))&amp;\approx KL(p(x|\theta’)||p(x|\theta’))+(\theta-\theta’)^\top\nabla_\theta KL(p(x|\theta)||p(x|\theta’))|<em>{\theta&#x3D;\theta’}\&amp;+\frac{1}{2}(\theta-\theta’)^{\top}H</em>{KL}(\theta-\theta’)<br>\end{align}$$由于$$\begin{align}<br>\nabla_\theta KL(p(x|\theta)||p(x|\theta’))|<em>{\theta&#x3D;\theta’}&amp;&#x3D;\int_X\nabla_\theta \big[p(x|\theta)log\frac{p(x|\theta)}{p(x|\theta’)}\big]|</em>{\theta&#x3D;\theta’}dx\&amp;&#x3D;\int_X\nabla_\theta \big[p(x|\theta)\big]|<em>{\theta&#x3D;\theta’}log{p(x|\theta’)}+\int_X p(x|\theta’)\nabla_\theta \big[log{p(x|\theta)}\big]|</em>{\theta&#x3D;\theta’}\&amp;-\int_X\nabla_\theta\big[p(x|\theta)\big]|<em>{\theta&#x3D;\theta’}log{p(x|\theta’)}dx\&amp;&#x3D;\int_X p(x|\theta’)\nabla</em>{\theta’} \big[log{p(x|\theta’)}\big]&#x3D;\int_X \nabla_{\theta’} p(x|\theta’)dx&#x3D;\nabla_{\theta’}\int_Xp(x|\theta’)dx&#x3D;0<br>\end{align}$$我们得到$$KL(p(x|\theta)||p(x|\theta’))\approx\frac{1}{2}(\theta-\theta’)^{\top}H_{KL}(\theta-\theta’)$$这是同一类型分布下，KL散度的二阶近似。上面的推导中有一个有趣的结果，即$$E_{p(x|\theta)}\big[\nabla_{\theta} log{p(x|\theta)}\big]&#x3D;\int_X p(x|\theta)\nabla_{\theta} log{p(x|\theta)}dx&#x3D;0$$我们记$s_x(\theta)&#x3D;\nabla_{\theta} log{p(x|\theta)}$。如果说$x$是数据，那么$p(x|\theta)$是对数据分布的建模（似然），我们希望最大化对数似然$log{p(x|\theta)}$，此时有$s_x(\theta)&#x3D;\nabla_{\theta} log{p(x|\theta)}&#x3D;0$。故，可以认为$s_x(\theta)$是对现估计参数的评判。但$s_x(\theta)$是基于数据的，可以认为其是一个统计量（分数），我们想知道$s_x(\theta)$是否总是评判准确的，我们可以计算$s_x(\theta)$的方差。这就引出了新的概念Fisher信息矩阵F。$$F&#x3D;Var\big[s_x(\theta)\big]&#x3D;E_{p(x|\theta)}\big[\nabla_{\theta} log{p(x|\theta)}^{\top}\nabla_{\theta} log{p(x|\theta)}\big]$$这里$E\big[s_x(\theta)\big]&#x3D;0$之所以介绍Fisher信息矩阵，是希望将KL散度与信息论的一些概念联系起来，以赋予KL散度一些新的意义。<br>我们看KL散度的海森矩阵$H_{KL}&#x3D;H_{KL(p(x|\theta)||p(x|\theta’))}|<em>{\theta&#x3D;\theta’}$$$\begin{align}<br>H</em>{KL}&amp;&#x3D;\nabla^2_\theta\int_X p(x|\theta)log\frac{p(x|\theta)}{p(x|\theta’)}dx|<em>{\theta&#x3D;\theta’}\&amp;&#x3D;\int_X \nabla^2_\theta\big[p(x|\theta)log\frac{p(x|\theta)}{p(x|\theta’)}\big]|</em>{\theta&#x3D;\theta’}dx\&amp;&#x3D;\int_X \nabla^2_\theta\big[p(x|\theta)\big]|<em>{\theta&#x3D;\theta’}log{p(x|\theta’)}dx+\int_X p(x|\theta’)\nabla^2_\theta\big[log{p(x|\theta)}\big]|</em>{\theta&#x3D;\theta’}dx\&amp;+2\int_X \nabla_\theta\big[p(x|\theta)\big]^\top|<em>{\theta&#x3D;\theta’}\nabla_\theta\big[log{p(x|\theta)}\big]|</em>{\theta&#x3D;\theta’}dx-\int_X \nabla^2_\theta \big[p(x|\theta)\big]|<em>{\theta&#x3D;\theta’}log{p(x|\theta’)}dx\&amp;&#x3D;\int_X\nabla_\theta^2p(x|\theta)|</em>{\theta&#x3D;\theta’}dx+\int_X\frac{1}{p(x|\theta’)}\nabla_\theta p(x|\theta)^\top|<em>{\theta&#x3D;\theta’}\nabla_\theta p(x|\theta)|</em>{\theta&#x3D;\theta’}dx\&amp;&#x3D;0+E_{p(x|\theta’)}\big[\nabla_{\theta’}logp(x|\theta’)^\top\nabla_{\theta’}logp(x|\theta’)\big]&#x3D;F_{\theta’}<br>\end{align}$$故，我们得到了KL散度用Fisher信息矩阵表现的近似$$KL(p(x|\theta)||p(x|\theta’))\approx\frac{1}{2}(\theta-\theta’)^{\top}F_{\theta’}(\theta-\theta’)$$如果我们用$\theta’$估计$\theta$，那么估计分布与真实分布之间的差距大致由估计偏差以及Fisher信息量（分数方差）决定。<br>自然梯度下降法是将KL散度作为罚函数的一种优化方法。给定函数$f(x)$，我们希望寻找其最小值点，即得到$x’$,满足$$x’&#x3D;\mathop{argmin}\limits_{x\in X}f(x)$$对于$f(x)$如果我们不知道其全局信息，我们将无计可施。用其一阶近似$f(x)\approx f(x_0)+\nabla_x f(x_0)^\top (x-x_0)$，我们得到$$x’&#x3D;\mathop{argmin}\limits_{x\in X}f(x_0)+\nabla_x f(x_0)^\top (x-x_0)$$这样优化的函数就是一个线性函数，很容易求得极小值。但是，如果$x$过于偏离$x_0$，一阶近似将失效。故我们引入罚函数（$x$与$x_0$欧氏距离），得到$$x’&#x3D;\mathop{argmin}\limits_{x\in X}\frac{||x-x_0||^2}{2\tau}+f(x_0)+\nabla_x f(x_0)^\top (x-x_0)$$这样求解只能得到$x_0$附近比其小的值，采用迭代的方法，得$$x_{k+1}&#x3D;\mathop{argmin}\limits_{x\in X}\frac{||x-x_k||^2}{2\tau}+f(x_k)+\nabla_x f(x_k)^\top (x-x_k)$$等式右边包含一个二次函数，通过求导可以得到其最小值，那么迭代过程变为$$x_{k+1}&#x3D;x_k-\tau\nabla_x f(x_k)$$如过我们将罚函数换成KL散度$KL(p(y|x)||p(y|x_k))$的二阶近似$\frac{1}{2}(x-x_k)^{\top}F_{x_k}(x-x_k)$，那么得到优化目标$$x_{k+1}&#x3D;\mathop{argmin}\limits_{x\in X}\frac{(x-x_k)^{\top}F_{x_k}(x-x_k)}{2\tau}+f(x_k)+\nabla_x f(x_k)^\top (x-x_k)$$同样的求右边二次函数的最小值，得$$x_{k+1}&#x3D;x_k-\tau F_{x_k}^{-1}\nabla_x f(x_k)$$$F_{x_k}$是Fisher信息矩阵，即$Var_{p(y|x_k)}\big[s_y(x_k)\big]$。这就是自然梯度下降法。</p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>John Doe</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://example.com/zhilong2002/2024/11/29/KL%E6%95%A3%E5%BA%A6%E4%B8%8E%E8%87%AA%E7%84%B6%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95/">http://example.com/zhilong2002/2024/11/29/KL%E6%95%A3%E5%BA%A6%E4%B8%8E%E8%87%AA%E7%84%B6%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/zhilong2002.github.io/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© John Doe | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
